@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 import Card from "./components/Card";
 
@@ -17,7 +17,7 @@ function App() {
   const [firstChoice, setFirstChoice] = useState(null);
   const [secondChoice, setSecondChoice] = useState(null);
 
-  const shuffleCards = useCallback(() => {
+  const shuffleCards = () => {
     const shuffledCards = [...allCards, ...allCards]
       .sort(() => 0.5 - Math.random())
       .map((card) => {
@@ -27,7 +27,7 @@ function App() {
     setFirstChoice(null);
     setSecondChoice(null);
     setTurn(11);
-  }, []);
+  };
 
   const handleChoice = (card) => {
     firstChoice ? setSecondChoice(card) : setFirstChoice(card);
@@ -35,22 +35,18 @@ function App() {
 
   useEffect(() => {
     shuffleCards();
-  }, [shuffleCards]);
-
-  const resetTurn = useCallback(() => {
-    setFirstChoice(null);
-    setSecondChoice(null);
-    setTurn((prevTurn) => prevTurn - 1);
+    return () => { };
   }, []);
+  // eslint-disable-next-line
 
   useEffect(() => {
     if (firstChoice && secondChoice) {
       if (firstChoice.src === secondChoice.src) {
-        setCards((prevCards) =>
-          prevCards.map((card) =>
-            card.src === firstChoice.src ? { ...card, matched: true } : card
-          )
-        );
+        cards.forEach((card) => {
+          if (card.src === firstChoice.src) {
+            card.matched = true;
+          }
+        });
         resetTurn();
       } else {
         setTimeout(() => {
@@ -58,7 +54,9 @@ function App() {
         }, 1000);
       }
     }
-  }, [firstChoice, secondChoice, resetTurn]);
+    return () => { };
+  }, [firstChoice, secondChoice]);
+  // eslint-disable-next-line
 
   useEffect(() => {
     if (turn !== 11) {
@@ -75,11 +73,19 @@ function App() {
         }, 500);
       }
     }
-  }, [turn, cards, shuffleCards]);
+    return () => { };
+  }, [turn]);
+  // eslint-disable-next-line
+
+  const resetTurn = () => {
+    setFirstChoice(null);
+    setSecondChoice(null);
+    setTurn(turn - 1);
+  };
 
   return (
     <div className="App">
-      <h1>Flip Frenzy</h1>
+      <h1>Magic Match</h1>
       <button onClick={shuffleCards}>New Game</button>
       <div className="cards">
         {cards.map((card) => (
